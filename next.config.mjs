@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "export",
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -9,18 +10,12 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  webpack: (config, { dev, isServer }) => {
-    if (!dev && !isServer) {
-      if (
-        config.optimization &&
-        Array.isArray(config.optimization.minimizer) &&
-        config.optimization.minimizer[0]?.options?.minimizer
-      ) {
-        config.optimization.minimizer[0].options.minimizer.hashFunction = 'xxhash64';
-      }
-    }
-    return config;
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
   },
+  poweredByHeader: false,
+  compress: true,
+  productionBrowserSourceMaps: false,
 }
 
 export default nextConfig

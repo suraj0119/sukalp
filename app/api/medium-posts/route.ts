@@ -2,6 +2,9 @@ import { type NextRequest, NextResponse } from "next/server"
 import { FALLBACK_POSTS } from "@/lib/constants"
 import { isLocalEnvironment } from "@/lib/environment"
 
+export const dynamic = 'force-static'
+export const revalidate = 3600
+
 // Enhanced mock data with more realistic content
 const ENHANCED_API_MOCK = {
   status: "ok",

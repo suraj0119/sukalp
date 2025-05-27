@@ -2,6 +2,9 @@ import { type NextRequest, NextResponse } from "next/server"
 import { BlogService } from "@/lib/blog/blog-service"
 import { blogSources } from "@/lib/blog/config"
 
+export const dynamic = 'force-static'
+export const revalidate = 3600 // Revalidate every hour
+
 // Create a server-side instance of the blog service
 const serverBlogService = new BlogService(blogSources)
 

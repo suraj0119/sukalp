@@ -5,8 +5,7 @@ import type { BlogPost } from "@/lib/blog/types"
 
 interface BlogPostsContainerProps {
   title?: string
-  sourceId?: string
-  showRefreshButton?: boolean
+  initialPosts?: BlogPost[]
   maxPosts?: number
 }
 
@@ -80,97 +79,23 @@ function BlogPostSkeleton() {
 
 export function BlogPostsContainer({
   title,
-  sourceId = "medium-main",
-  showRefreshButton = false,
+  initialPosts = [],
   maxPosts = 6,
 }: BlogPostsContainerProps) {
-  const [posts, setPosts] = useState<BlogPost[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const fetchPosts = async (forceRefresh = false) => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await fetch(`/api/blog/fetch?sourceId=${sourceId}&forceRefresh=${forceRefresh}`)
-      if (!response.ok) {
-        throw new Error(`Failed to fetch posts: ${response.status}`)
-      }
-
-      const data = await response.json()
-      if (!data.success) {
-        throw new Error(data.error || "Failed to load posts")
-      }
-
-      setPosts(data.posts.slice(0, maxPosts))
-    } catch (err) {
-      console.error("Error fetching posts:", err)
-      setError("Failed to load the latest articles. Please try again later.")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchPosts()
-  }, [sourceId, maxPosts])
-
   return (
     <div className="w-full">
       {title && <h2 className="text-2xl font-bold mb-6">{title}</h2>}
 
-      {showRefreshButton && (
-        <div className="flex justify-end mb-6">
-          <button
-            onClick={() => fetchPosts(true)}
-            className="text-orange-500 hover:text-orange-700 font-medium flex items-center"
-            disabled={loading}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className={`h-5 w-5 mr-2 ${loading ? "animate-spin" : ""}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            Refresh
-          </button>
-        </div>
-      )}
-
-      {loading ? (
+      {initialPosts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[...Array(maxPosts)].map((_, index) => (
-            <BlogPostSkeleton key={index} />
+          {initialPosts.slice(0, maxPosts).map((post) => (
+            <BlogPostCard key={post.id} post={post} />
           ))}
         </div>
       ) : (
-        <>
-          {error && (
-            <div className="text-center py-4 mb-8">
-              <p className="text-gray-600">{error}</p>
-            </div>
-          )}
-          {posts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post) => (
-                <BlogPostCard key={post.id} post={post} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-600">No articles found.</p>
-            </div>
-          )}
-        </>
+        <div className="text-center py-8">
+          <p className="text-gray-600">No articles found.</p>
+        </div>
       )}
     </div>
   )
